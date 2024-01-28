@@ -83,26 +83,24 @@ verifier_et_installer "Zenity" "zenity" "brew install zenity"
 
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
-    local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
+    local repo_url="https://github.com/VicBrnd/Aria2Fetch.git"
     local script_dir=$(cd "$(dirname "$0")" && pwd)
-    local config_file="$HOME/Documents/.Aria2Fetch/Config.cfg"
+    local script_name=$(basename "$0")
     local current_version=$(git -C "$script_dir" describe --tags --abbrev=0)
-    local latest_version=$(git ls-remote --tags "$repo_url" | cut -d'/' -f3 | sort -V | tail -n1)
+    local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
 
     echo "Version actuelle: $current_version"
     echo "Vérification des mises à jour..."
 
-    if [ "$latest_version" != "$current_version" ]; then
+    if [[ "$latest_version" != "$current_version" && $(echo -e "$latest_version\n$current_version" | sort -V | head -n1) != "$latest_version" ]]; then
         echo "Nouvelle version disponible: $latest_version"
         echo "Voulez-vous mettre à jour le script ? (oui/non)"
         read -r reponse
         if [[ "$reponse" == "oui" ]]; then
             git -C "$script_dir" fetch --tags
             git -C "$script_dir" checkout "$latest_version"
-
-            # Mettre à jour la version dans le fichier de configuration
-            sed -i '' "s/^version=.*/version=\"$latest_version\"/" "$config_file"
-
+            # Assurez-vous que le script garde le même nom
+            mv "$script_dir/${script_name%.sh}-$latest_version.sh" "$script_dir/$script_name"
             echo "Le script a été mis à jour à la version $latest_version"
             echo "Veuillez redémarrer le script pour appliquer les mises à jour."
         else
@@ -112,6 +110,7 @@ verifier_mise_a_jour() {
         echo "Votre script est déjà à jour."
     fi
 }
+
 
 # Fonction pour demander à l'utilisateur de configurer le répertoire des torrents.
 demander_repertoire_torrents() {
