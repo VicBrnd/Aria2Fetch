@@ -402,7 +402,7 @@ arreter_aria2_rpc() {
 }
 
 # --- FONCTIONS DU MENU PRINCIPAL ET BOUCLE PRINCIPALE DU SCRIPT ---
-verifier_et_mettre_a_jour_script
+verifier_mise_a_jour
 # Vérifie et charge la configuration
 load_config
 # Demander à l'utilisateur de configurer le répertoire des torrents si nécessaire.
