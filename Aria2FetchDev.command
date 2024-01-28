@@ -83,7 +83,7 @@ verifier_et_installer "Zenity" "zenity" "brew install zenity"
 
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
-    local repo_url="https://github.com/VicBrnd/Aria2Fetch.git"
+    local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
     local script_dir=$(cd "$(dirname "$0")" && pwd)
     local config_file="$HOME/Documents/.Aria2Fetch/Config.cfg"
     local current_version=$(git -C "$script_dir" describe --tags --abbrev=0)
