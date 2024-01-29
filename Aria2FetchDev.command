@@ -88,54 +88,57 @@ verifier_et_installer "Git" "git" "brew install git"
 verifier_mise_a_jour() {
     local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
     local script_name=$(basename "$0")
-    local script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-    local script_path="${script_dir}/${script_name}"
+    local script_dir=$(dirname "$(readlink -f "$0")")
+    local script_path=$(readlink -f "$0")
 
     # Vérification de la connexion Internet
-    if ! curl -Is http://www.google.com | head -5 | grep "200 OK" >/dev/null 2>&1; then
+    if ! ping -c 1 8.8.8.8 >/dev/null 2>&1; then
         echo "Pas de connexion Internet. Impossible de vérifier les mises à jour."
         return 1
     fi
-
-    # Vérification de l'existence de git
-    if ! command -v git >/dev/null 2>&1; then
-        echo "git n'est pas installé. Impossible de vérifier les mises à jour."
-        return 1
-    fi
-
-    # Choix entre curl et wget pour le téléchargement
-    local download_cmd
-    if command -v curl >/dev/null 2>&1; then
-        download_cmd="curl -fsSL"
-    elif command -v wget >/dev/null 2>&1; then
-        download_cmd="wget -qO-"
-    else
-        echo "Ni curl ni wget n'est installé. Impossible de télécharger la mise à jour."
-        return 1
-    fi
-
+    
     echo "Début de la vérification des mises à jour..."
     local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
+    if [ $? -ne 0 ]; then
+        echo "Erreur lors de la récupération de la dernière version."
+        return 1
+    fi
     latest_version=${latest_version#v}
-
     echo "Dernière version disponible sur le dépôt distant: $latest_version"
-    echo "Version actuelle : $script_version"
+    echo "Version actuel : $script_version"
 
     if [[ "$latest_version" != "$script_version" ]]; then
         echo "Nouvelle version disponible: $latest_version"
         echo "Voulez-vous mettre à jour le script ? (oui/non)"
         read -r reponse
+        reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
 
         if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
-            local temp_script="${script_dir}/temp_${script_name}"
-            $download_cmd "$repo_url/raw/master/$script_name" > "$temp_script"
+            local temp_script="$script_dir/temp_script.command"
+            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/$script_name" -o "$temp_script"
+            if [ $? -ne 0 ]; then
+                echo "Erreur lors du téléchargement de la nouvelle version."
+                return 1
+            fi
+
             if [ -f "$temp_script" ]; then
                 chmod +x "$temp_script"
                 mv "$temp_script" "$script_path"
+                if [ $? -ne 0 ]; then
+                    echo "Erreur lors du déplacement du script temporaire vers le chemin du script final."
+                    return 1
+                fi
+
                 echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
-                exec "$script_path"
+                if [ -f "$script_path" ]; then
+                    exec "$script_path"
+                else
+                    echo "Erreur : Le chemin du script est incorrect."
+                    return 1
+                fi
             else
                 echo "Erreur lors du téléchargement de la nouvelle version."
+                return 1
             fi
         else
             echo "Mise à jour annulée."
@@ -144,7 +147,6 @@ verifier_mise_a_jour() {
         echo "Votre script est déjà à jour."
     fi
 }
-
 
 # Fonction pour demander à l'utilisateur de configurer le répertoire des torrents.
 demander_repertoire_torrents() {
