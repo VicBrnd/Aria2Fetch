@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Aria2Fetch Script
-script_version="1.0.2"
-echo -ne "\033]0;Aria2Fetch 1.0.2 🚀\007"
+script_version="1.0.0"
+echo -ne "\033]0;Aria2Fetch 1.0.0 🚀\007"
 
 # --- Initialisation des Variables Globales ---
 # Dossiers et fichiers de configuration pour le script.
@@ -46,21 +46,6 @@ print_message() {
 log_activity() {
     echo "[$(date)] $1" >> "$logfile"
 }
-
-# Initialiser ou mettre à jour le dépôt Git dans le dossier de configuration
-if [ ! -d "$config_dir/.git" ]; then
-    echo "Initialisation du dossier $config_dir comme dépôt Git..."
-    git -C "$config_dir" init
-    git -C "$config_dir" remote add origin "$repo_url"
-else
-    git -C "$config_dir" remote set-url origin "$repo_url"
-fi
-git -C "$config_dir" fetch --tags
-
-# Récupérer la version actuelle du script à partir des tags Git
-script_version=$(git -C "$config_dir" describe --tags --abbrev=0 2> /dev/null || echo "0.0.0")
-
-echo "Version actuelle du script: $script_version"
 
 # --- FONCTIONS DE VERIFICATION ET D'INSTALLATION DES DEPENDANCES ---
 # Fonction pour demander à l'utilisateur d'installer des dépendances manquantes.
