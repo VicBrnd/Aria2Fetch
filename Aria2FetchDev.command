@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Aria2Fetch Script
-script_version="1.0.0"
+script_version="1.0.1"
 echo -ne "\033]0;Aria2Fetch 🚀\007"
 
 # --- Initialisation des Variables Globales ---
