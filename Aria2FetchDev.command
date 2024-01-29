@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Aria2Fetch Script
-script_version="1.0.1"
-echo -ne "\033]0;Aria2Fetch 1.0.1  🚀\007"
+script_version="1.0.2"
+echo -ne "\033]0;Aria2Fetch 1.0.2 🚀\007"
 
 # --- Initialisation des Variables Globales ---
 # Dossiers et fichiers de configuration pour le script.
