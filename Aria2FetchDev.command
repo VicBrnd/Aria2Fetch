@@ -87,25 +87,26 @@ verifier_et_installer "Git" "git" "brew install git"
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
     local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
-    local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
     local script_name=$(basename "$0")
     local script_dir=$(cd "$(dirname "$0")" && pwd)
     local script_path="${script_dir}/${script_name}"
 
     if ! curl -Is http://www.google.com | head -5 | grep "200 OK" >/dev/null 2>&1; then
-        echo "Pas de connexion Internet. Passage en mode hors ligne."
+        echo -e "${YELLOW}${ICON_WARNING} Pas de connexion Internet. Passage en mode hors ligne.${NC}"
         return 0
     fi
 
-    echo "Début de la vérification des mises à jour..."
+    echo -e "${CYAN}Début de la vérification des mises à jour...${NC}"
+    echo ""
     local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
     latest_version=${latest_version#v}
-    echo "Dernière version disponible sur le dépôt distant: $latest_version"
-    echo "Version actuelle : $script_version"
+    echo -e "${CYAN}Dernière version disponible sur le dépôt distant: ${GREEN}$latest_version${NC}"
+    echo -e "${CYAN}Version actuelle : ${GREEN}$script_version${NC}"
+    echo ""
 
     if [[ "$latest_version" != "$script_version" ]]; then
-        echo "Nouvelle version disponible: $latest_version"
-        echo "Voulez-vous mettre à jour le script ? (oui/non)"
+        echo -e "${YELLOW}${ICON_QUESTION} Nouvelle version disponible: ${GREEN}$latest_version${NC}"
+        echo -e "${YELLOW}Voulez-vous mettre à jour le script ? (oui/non)${NC}"
         read -r reponse
         if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
             local temp_script="$(dirname "$script_path")/temp_script.command"
@@ -114,7 +115,7 @@ verifier_mise_a_jour() {
             if [ -f "$temp_script" ]; then
                 chmod +x "$temp_script"
                 mv "$temp_script" "$script_path"
-                echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
+                echo -e "${GREEN}${ICON_SUCCESS} Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé.${NC}"
 
                 # Tentative d'utilisation de exec pour relancer le script
                 exec "$script_path" 2>/dev/null
@@ -124,18 +125,18 @@ verifier_mise_a_jour() {
                     "$script_path"
                     exit
                 else
-                    echo "Erreur : Le chemin du script est incorrect."
+                    echo -e "${RED}${ICON_FAIL} Erreur : Le chemin du script est incorrect.${NC}"
                     return 1
                 fi
             else
-                echo "Erreur lors du téléchargement de la nouvelle version."
+                echo -e "${RED}${ICON_FAIL} Erreur lors du téléchargement de la nouvelle version.${NC}"
                 return 1
             fi
         else
-            echo "Mise à jour annulée."
+            echo -e "${YELLOW}Mise à jour annulée.${NC}"
         fi
     else
-        echo "Votre script est déjà à jour."
+        echo -e "${GREEN}${ICON_SUCCESS} Votre script est déjà à jour.${NC}"
     fi
 }
 
