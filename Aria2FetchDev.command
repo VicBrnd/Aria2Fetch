@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Aria2Fetch Script
-script_version="1.0.0"
+script_version="1.0.3"
 echo -ne "\033]0;Aria2Fetch 🚀\007"
 
 # --- Initialisation des Variables Globales ---
@@ -116,9 +116,11 @@ verifier_mise_a_jour() {
                 chmod +x "$temp_script"
                 mv "$temp_script" "$script_path"
                 echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
-                 # Relancer le script dans un nouveau processus
-                bash "$script_path" &
-                exit 0
+                if [ -f "$script_path" ]; then
+                    exec "$script_path"
+                else
+                    echo "Erreur : Le chemin du script est incorrect."
+                fi
             else
                 echo "Erreur lors du téléchargement de la nouvelle version."
             fi
