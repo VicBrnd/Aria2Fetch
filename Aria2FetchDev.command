@@ -109,10 +109,9 @@ verifier_mise_a_jour() {
         echo "Voulez-vous mettre à jour le script ? (oui/non)"
         read -r reponse
 
-                if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
+        if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
             local temp_script="${script_dir}/temp_${script_name}"
-            # Correction de l'URL de téléchargement
-            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/${script_name}" -o "$temp_script"
+            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/Aria2FetchDev.command" -o "$temp_script"
             if [ -f "$temp_script" ]; then
                 chmod +x "$temp_script"
                 mv "$temp_script" "$script_path"
@@ -128,6 +127,7 @@ verifier_mise_a_jour() {
         echo "Votre script est déjà à jour."
     fi
 }
+
 
 
 # Fonction pour demander à l'utilisateur de configurer le répertoire des torrents.
