@@ -87,7 +87,10 @@ verifier_et_installer "Git" "git" "brew install git"
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
     local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
-    local script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+    local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
+    local script_name=$(basename "$0")
+    local script_dir=$(cd "$(dirname "$0")" && pwd)
+    local script_path="${script_dir}/${script_name}"
 
     if ! curl -Is http://www.google.com | head -5 | grep "200 OK" >/dev/null 2>&1; then
         echo "Pas de connexion Internet. Passage en mode hors ligne."
