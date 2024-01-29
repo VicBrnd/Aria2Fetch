@@ -47,6 +47,21 @@ log_activity() {
     echo "[$(date)] $1" >> "$logfile"
 }
 
+# Initialiser ou mettre à jour le dépôt Git dans le dossier de configuration
+if [ ! -d "$config_dir/.git" ]; then
+    echo "Initialisation du dossier $config_dir comme dépôt Git..."
+    git -C "$config_dir" init
+    git -C "$config_dir" remote add origin "$repo_url"
+else
+    git -C "$config_dir" remote set-url origin "$repo_url"
+fi
+git -C "$config_dir" fetch --tags
+
+# Récupérer la version actuelle du script à partir des tags Git
+script_version=$(git -C "$config_dir" describe --tags --abbrev=0 2> /dev/null || echo "0.0.0")
+
+echo "Version actuelle du script: $script_version"
+
 # --- FONCTIONS DE VERIFICATION ET D'INSTALLATION DES DEPENDANCES ---
 # Fonction pour demander à l'utilisateur d'installer des dépendances manquantes.
 verifier_et_installer() {
@@ -84,35 +99,21 @@ verifier_et_installer "Zenity" "zenity" "brew install zenity"
 
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
-    local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
-    local script_dir=$(cd "$(dirname "$0")" && pwd)
-    local script_path=$(readlink -f "$0")
+    # Récupérer la dernière version disponible
+    local latest_version=$(git -C "$config_dir" ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
+    echo "Dernière version disponible: $latest_version"
 
-    echo "Début de la vérification des mises à jour..."
-    local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
-    latest_version=${latest_version#v}
-    echo "Dernière version disponible sur le dépôt distant: $latest_version"
-    echo "Version actuel : $script_version"
-
-
-    if [[ "$latest_version" != "$script_version" ]]; then
+    # Comparer la version actuelle avec la dernière version
+    if [ "$latest_version" != "$script_version" ]; then
         echo "Nouvelle version disponible: $latest_version"
         echo "Voulez-vous mettre à jour le script ? (oui/non)"
         read -r reponse
-        reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
-
         if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
-            local temp_script="$script_dir/temp_script.command"
-            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/Aria2FetchDev.command" -o "$temp_script"
-
-            if [ -f "$temp_script" ]; then
-                chmod +x "$temp_script"
-                mv "$temp_script" "$script_path"
-                echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
-                exec "$script_path"
-            else
-                echo "Erreur lors du téléchargement de la nouvelle version."
-            fi
+            local script_path=$(readlink -f "$0")
+            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/Aria2FetchDev.command" -o "$script_path"
+            chmod +x "$script_path"
+            echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
+            exec "$script_path"
         else
             echo "Mise à jour annulée."
         fi
