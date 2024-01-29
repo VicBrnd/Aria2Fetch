@@ -103,7 +103,7 @@ verifier_mise_a_jour() {
         read -r reponse
         reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
 
-        if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
+                if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
             local temp_script="$script_dir/temp_script.command"
             curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/Aria2FetchDev.command" -o "$temp_script"
 
@@ -111,7 +111,11 @@ verifier_mise_a_jour() {
                 chmod +x "$temp_script"
                 mv "$temp_script" "$script_path"
                 echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
-                exec "$script_path"
+                if [ -f "$script_path" ]; then
+                    exec "$script_path"
+                else
+                    echo "Erreur : Le chemin du script est incorrect."
+                fi
             else
                 echo "Erreur lors du téléchargement de la nouvelle version."
             fi
