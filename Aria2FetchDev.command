@@ -92,6 +92,8 @@ verifier_mise_a_jour() {
     local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
     latest_version=${latest_version#v}
     echo "Dernière version disponible sur le dépôt distant: $latest_version"
+    echo "Version actuel : $script_version"
+
 
     if [[ "$latest_version" != "$script_version" ]]; then
         echo "Nouvelle version disponible: $latest_version"
