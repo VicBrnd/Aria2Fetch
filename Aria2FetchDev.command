@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Aria2Fetch Script
-echo -ne "\033]0;Aria2Fetch 🚀\007"
+script_version="1.0.1"
+echo -ne "\033]0;Aria2Fetch 1.0.1 🚀\007"
 
 # --- Initialisation des Variables Globales ---
 # Dossiers et fichiers de configuration pour le script.
@@ -83,26 +84,34 @@ verifier_et_installer "Zenity" "zenity" "brew install zenity"
 
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
-    local repo_url="https://github.com/VicBrnd/Aria2Fetch.git"
+    local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
     local script_dir=$(cd "$(dirname "$0")" && pwd)
     local script_name=$(basename "$0")
-    local current_version=$(git -C "$script_dir" describe --tags --abbrev=0)
+    local script_path="$script_dir/$script_name"
+
+    echo "Début de la vérification des mises à jour..."
+
+    # Récupération de la dernière version
     local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
+    latest_version=${latest_version#v}
 
-    echo "Version actuelle: $current_version"
-    echo "Vérification des mises à jour..."
-
-    if [[ "$latest_version" != "$current_version" && $(echo -e "$latest_version\n$current_version" | sort -V | head -n1) != "$latest_version" ]]; then
+    # Comparaison des versions
+    if [[ "$latest_version" != "$script_version" ]]; then
         echo "Nouvelle version disponible: $latest_version"
         echo "Voulez-vous mettre à jour le script ? (oui/non)"
         read -r reponse
         if [[ "$reponse" == "oui" ]]; then
-            git -C "$script_dir" fetch --tags
-            git -C "$script_dir" checkout "$latest_version"
-            # Assurez-vous que le script garde le même nom
-            mv "$script_dir/${script_name%.sh}-$latest_version.sh" "$script_dir/$script_name"
-            echo "Le script a été mis à jour à la version $latest_version"
-            echo "Veuillez redémarrer le script pour appliquer les mises à jour."
+            # Téléchargement de la nouvelle version
+            local temp_script="$script_dir/temp_script.command"
+            curl -fsSL "$repo_url/raw/master/Aria2FetchDev.command" -o "$temp_script"
+            chmod +x "$temp_script"
+
+            # Remplacement du script actuel par la nouvelle version
+            mv "$temp_script" "$script_path"
+
+            # Relancer le script
+            echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
+            exec "$script_path"
         else
             echo "Mise à jour annulée."
         fi
@@ -110,6 +119,7 @@ verifier_mise_a_jour() {
         echo "Votre script est déjà à jour."
     fi
 }
+
 
 
 # Fonction pour demander à l'utilisateur de configurer le répertoire des torrents.
@@ -201,6 +211,7 @@ load_config() {
         echo "repertoire_poubelle=$HOME/.Trash" >> "$config_file"
         echo "install_ariang=" >> "$config_file"
         echo "repertoire_ariang=" >> "$config_file"
+        echo "version=" >> "$config_file"
     fi
     source "$config_file"
 }
@@ -212,6 +223,7 @@ mettre_a_jour_config() {
         echo "repertoire_poubelle=\"$repertoire_poubelle\""
         echo "repertoire_ariang=\"$repertoire_ariang\""
         echo "install_ariang=\"$install_ariang\""
+        echo "version=\"$script_version\""  # Utiliser la variable script_version
     } > "$config_file"
 }
 
@@ -401,9 +413,10 @@ arreter_aria2_rpc() {
 }
 
 # --- FONCTIONS DU MENU PRINCIPAL ET BOUCLE PRINCIPALE DU SCRIPT ---
-verifier_mise_a_jour
 # Vérifie et charge la configuration
 load_config
+verifier_mise_a_jour
+
 # Demander à l'utilisateur de configurer le répertoire des torrents si nécessaire.
 if [ -z "$repertoire_torrents" ]; then
     if ! demander_repertoire_torrents; then
