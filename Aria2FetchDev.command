@@ -99,21 +99,35 @@ verifier_et_installer "Zenity" "zenity" "brew install zenity"
 
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
-    # Récupérer la dernière version disponible
-    local latest_version=$(git -C "$config_dir" ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
-    echo "Dernière version disponible: $latest_version"
+    local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
+    local script_dir=$(cd "$(dirname "$0")" && pwd)
+    local script_path=$(readlink -f "$0")
 
-    # Comparer la version actuelle avec la dernière version
-    if [ "$latest_version" != "$script_version" ]; then
+    echo "Début de la vérification des mises à jour..."
+    local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
+    latest_version=${latest_version#v}
+    echo "Dernière version disponible sur le dépôt distant: $latest_version"
+    echo "Version actuel : $script_version"
+
+
+    if [[ "$latest_version" != "$script_version" ]]; then
         echo "Nouvelle version disponible: $latest_version"
         echo "Voulez-vous mettre à jour le script ? (oui/non)"
         read -r reponse
+        reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
+
         if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
-            local script_path=$(readlink -f "$0")
-            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/Aria2FetchDev.command" -o "$script_path"
-            chmod +x "$script_path"
-            echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
-            exec "$script_path"
+            local temp_script="$script_dir/temp_script.command"
+            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/Aria2FetchDev.command" -o "$temp_script"
+
+            if [ -f "$temp_script" ]; then
+                chmod +x "$temp_script"
+                mv "$temp_script" "$script_path"
+                echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
+                exec "$script_path"
+            else
+                echo "Erreur lors du téléchargement de la nouvelle version."
+            fi
         else
             echo "Mise à jour annulée."
         fi
