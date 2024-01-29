@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Aria2Fetch Script
-script_version="1.0.1"
-echo -ne "\033]0;Aria2Fetch 1.0.1 🚀\007"
+script_version="1.0.0"
+echo -ne "\033]0;Aria2Fetch 🚀\007"
 
 # --- Initialisation des Variables Globales ---
 # Dossiers et fichiers de configuration pour le script.
@@ -81,6 +81,8 @@ fi
 verifier_et_installer "Homebrew" "brew" "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
 verifier_et_installer "Aria2" "aria2c" "brew install aria2"
 verifier_et_installer "Zenity" "zenity" "brew install zenity"
+verifier_et_installer "Git" "git" "brew install git"
+
 
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
@@ -428,6 +430,7 @@ afficher_menu() {
     load_config
     local repertoire_ariang="$config_dir/AriaNg"
     clear
+    print_message "$CYAN" "$ICON_INFO" " Version du Script : ""$GREEN"$script_version""
     print_message "$CYAN" "$ICON_INFO" " Répertoire des Torrents : ""$GREEN"$repertoire_torrents""
     print_message "$CYAN" "$ICON_INFO" " Répertoire de Destination : ""$GREEN"$repertoire_destination""
     echo
