@@ -87,37 +87,46 @@ verifier_et_installer "Git" "git" "brew install git"
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
     local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
-    local script_dir=$(cd "$(dirname "$0")" && pwd)
-    local script_path=$(readlink -f "$0")
+    local script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+
+    if ! curl -Is http://www.google.com | head -5 | grep "200 OK" >/dev/null 2>&1; then
+        echo "Pas de connexion Internet. Passage en mode hors ligne."
+        return 0
+    fi
 
     echo "Début de la vérification des mises à jour..."
     local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
     latest_version=${latest_version#v}
     echo "Dernière version disponible sur le dépôt distant: $latest_version"
-    echo "Version actuel : $script_version"
-
+    echo "Version actuelle : $script_version"
 
     if [[ "$latest_version" != "$script_version" ]]; then
         echo "Nouvelle version disponible: $latest_version"
         echo "Voulez-vous mettre à jour le script ? (oui/non)"
         read -r reponse
-        reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
-
-                if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
-            local temp_script="$script_dir/temp_script.command"
+        if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
+            local temp_script="$(dirname "$script_path")/temp_script.command"
             curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/Aria2FetchDev.command" -o "$temp_script"
 
             if [ -f "$temp_script" ]; then
                 chmod +x "$temp_script"
                 mv "$temp_script" "$script_path"
                 echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
+
+                # Tentative d'utilisation de exec pour relancer le script
+                exec "$script_path" 2>/dev/null
+
+                # Si exec échoue, tenter de relancer le script dans un nouveau processus
                 if [ -f "$script_path" ]; then
-                    exec "$script_path"
+                    "$script_path"
+                    exit
                 else
                     echo "Erreur : Le chemin du script est incorrect."
+                    return 1
                 fi
             else
                 echo "Erreur lors du téléchargement de la nouvelle version."
+                return 1
             fi
         else
             echo "Mise à jour annulée."
