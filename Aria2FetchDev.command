@@ -90,6 +90,11 @@ verifier_mise_a_jour() {
     local script_dir=$(cd "$(dirname "$0")" && pwd)
     local script_path=$(readlink -f "$0")
 
+    if ! curl -Is http://www.google.com | head -5 | grep "200 OK" >/dev/null 2>&1; then
+    echo "Pas de connexion Internet. Passage en mode hors ligne."
+    return 0
+    fi
+
     echo "Début de la vérification des mises à jour..."
     local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
     latest_version=${latest_version#v}
