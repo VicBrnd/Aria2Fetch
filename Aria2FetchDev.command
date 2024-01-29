@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Aria2Fetch Script
-script_version="1.0.3"
+script_version="1.0.0"
 echo -ne "\033]0;Aria2Fetch 🚀\007"
 
 # --- Initialisation des Variables Globales ---
@@ -109,9 +109,10 @@ verifier_mise_a_jour() {
         echo "Voulez-vous mettre à jour le script ? (oui/non)"
         read -r reponse
 
-        if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
+                if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
             local temp_script="${script_dir}/temp_${script_name}"
-            curl -fsSL "$repo_url/raw/master/$script_name" -o "$temp_script"
+            # Correction de l'URL de téléchargement
+            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/${script_name}" -o "$temp_script"
             if [ -f "$temp_script" ]; then
                 chmod +x "$temp_script"
                 mv "$temp_script" "$script_path"
