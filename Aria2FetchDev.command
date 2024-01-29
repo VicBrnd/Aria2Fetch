@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Aria2Fetch Script
-script_version="1.0.2"
+script_version="1.0.0"
 echo -ne "\033]0;Aria2Fetch 🚀\007"
 
 # --- Initialisation des Variables Globales ---
@@ -434,7 +434,6 @@ afficher_menu() {
     load_config
     local repertoire_ariang="$config_dir/AriaNg"
     clear
-    print_message "$CYAN" "$ICON_INFO" " PHIPHI LE BOOS : ""$GREEN"
     print_message "$CYAN" "$ICON_INFO" " Version du Script : ""$GREEN"$script_version""
     print_message "$CYAN" "$ICON_INFO" " Répertoire des Torrents : ""$GREEN"$repertoire_torrents""
     print_message "$CYAN" "$ICON_INFO" " Répertoire de Destination : ""$GREEN"$repertoire_destination""
