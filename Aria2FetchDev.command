@@ -87,25 +87,15 @@ verifier_et_installer "Git" "git" "brew install git"
 # vérifier mise à jour du script
 verifier_mise_a_jour() {
     local repo_url="https://github.com/VicBrnd/Aria2FetchDev.git"
-    local script_name=$(basename "$0")
-    local script_dir=$(dirname "$(readlink -f "$0")")
+    local script_dir=$(cd "$(dirname "$0")" && pwd)
     local script_path=$(readlink -f "$0")
 
-    # Vérification de la connexion Internet
-    if ! ping -c 1 8.8.8.8 >/dev/null 2>&1; then
-        echo "Pas de connexion Internet. Impossible de vérifier les mises à jour."
-        return 1
-    fi
-    
     echo "Début de la vérification des mises à jour..."
     local latest_version=$(git ls-remote --tags "$repo_url" | awk -F/ '{print $3}' | sort -V | tail -n1)
-    if [ $? -ne 0 ]; then
-        echo "Erreur lors de la récupération de la dernière version."
-        return 1
-    fi
     latest_version=${latest_version#v}
     echo "Dernière version disponible sur le dépôt distant: $latest_version"
     echo "Version actuel : $script_version"
+
 
     if [[ "$latest_version" != "$script_version" ]]; then
         echo "Nouvelle version disponible: $latest_version"
@@ -113,32 +103,21 @@ verifier_mise_a_jour() {
         read -r reponse
         reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
 
-        if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
+                if [[ "$reponse" == "oui" || "$reponse" == "o" ]]; then
             local temp_script="$script_dir/temp_script.command"
-            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/$script_name" -o "$temp_script"
-            if [ $? -ne 0 ]; then
-                echo "Erreur lors du téléchargement de la nouvelle version."
-                return 1
-            fi
+            curl -fsSL "https://raw.githubusercontent.com/VicBrnd/Aria2FetchDev/master/Aria2FetchDev.command" -o "$temp_script"
 
             if [ -f "$temp_script" ]; then
                 chmod +x "$temp_script"
                 mv "$temp_script" "$script_path"
-                if [ $? -ne 0 ]; then
-                    echo "Erreur lors du déplacement du script temporaire vers le chemin du script final."
-                    return 1
-                fi
-
                 echo "Le script a été mis à jour à la version $latest_version. Il va maintenant être relancé."
                 if [ -f "$script_path" ]; then
                     exec "$script_path"
                 else
                     echo "Erreur : Le chemin du script est incorrect."
-                    return 1
                 fi
             else
                 echo "Erreur lors du téléchargement de la nouvelle version."
-                return 1
             fi
         else
             echo "Mise à jour annulée."
