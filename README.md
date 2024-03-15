@@ -21,3 +21,8 @@ Aria2Fetch est un script Bash conçu pour optimiser et automatiser votre process
    ./Aria2Fetch.sh
 
 ## Screenshot 📸
+
+<p float="center" align="center">
+<a target="_blank"><img src="https://github.com/VicBrnd/Image_Brnd/blob/master/Aria2Fetch/af-home.png?raw=true" width="400"></a>
+<a target="_blank"><img src="https://github.com/VicBrnd/Image_Brnd/blob/master/Aria2Fetch/af-web.png?raw=true" width="400"></a>
+</p>
