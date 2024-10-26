@@ -170,7 +170,7 @@ demander_repertoire_torrents() {
 # Fonction pour demander à l'utilisateur d'installer l'interface web AriaNg.
 demander_interface_web() {
     local mode="$1"
-    local ariang_url="https://github.com/rickylawson/AriaNgDark/archive/refs/heads/master.zip"
+    local ariang_url="https://github.com/VicBrnd/AriaNgDark/archive/refs/heads/main.zip"
     local ariang_zip="$config_dir/AriaNgDark-main.zip"
     local ariang_extract_dir="$config_dir/AriaNgDark-main"
     local repertoire_ariang="$config_dir/AriaNg"
